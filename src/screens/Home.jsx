@@ -10,69 +10,7 @@ import {
 } from 'react-native';
 import {ScrollView} from 'react-native-gesture-handler';
 import {ImageSlider} from 'react-native-image-slider-banner';
-
-const DATA = [
-  {
-    id: 'bd7acbea-c1b1-46c2-aed5-3ad53abb28ba',
-    title: 'Nutella',
-    image:
-      'https://vambuket.by/wp-content/uploads/2020/11/407D2AF9-BBAF-4379-B88E-BAD713786E42-768x768.png',
-    weight: '350г',
-    price: '24.59',
-    newPrice: '13.59',
-    discount: '-22%',
-  },
-  {
-    id: '3ac68afc-c605-48d3-a4f8-fbd91aa97f63',
-    title: 'Корм для собак «Chappi» мясное изобилие',
-    image:
-      'https://img.e-dostavka.by/UserFiles/images/catalog/Goods/4046/00154046/norm/thumbs/00154046.n_1_180x180@2x.png',
-    weight: '15 кг',
-    price: '74.89',
-    newPrice: '64.99',
-    discount: '-13%',
-  },
-  {
-    id: '58694a0f-3da1-471f-bd96-145571e29d72',
-    title: 'Мобильный телефон «Vertex»',
-    image:
-      'https://img.e-dostavka.by/UserFiles/images/catalog/Goods/3611/01373611/norm/thumbs/01373611.n_1_180x180@2x.png',
-    weight: '',
-    price: '32.00',
-    newPrice: '37.59',
-    discount: '-12%',
-  },
-  {
-    id: 'bd7acbea-c1b1-46c2-aed5-3ad53abba',
-    title: 'Nutella',
-    image:
-      'https://vambuket.by/wp-content/uploads/2020/11/407D2AF9-BBAF-4379-B88E-BAD713786E42-768x768.png',
-    weight: '350г',
-    price: '24.59',
-    newPrice: '13.59',
-    discount: '-22%',
-  },
-  {
-    id: '3ac68afc-c605-48d3-a4f8-fbd97f63',
-    title: 'Корм для собак «Chappi» мясное изобилие',
-    image:
-      'https://img.e-dostavka.by/UserFiles/images/catalog/Goods/4046/00154046/norm/thumbs/00154046.n_1_180x180@2x.png',
-    weight: '15 кг',
-    price: '74.89',
-    newPrice: '64.99',
-    discount: '-13%',
-  },
-  {
-    id: '58694a0f-3da1-471f-bd96-11e29d72',
-    title: 'Мобильный телефон «Vertex»',
-    image:
-      'https://img.e-dostavka.by/UserFiles/images/catalog/Goods/3611/01373611/norm/thumbs/01373611.n_1_180x180@2x.png',
-    weight: '',
-    price: '32.00',
-    newPrice: '37.59',
-    discount: '-12%',
-  },
-];
+import store from '../store/store';
 
 const Item = ({title, image, weight, price, newPrice, discount}) => (
   <View style={styles.item}>
@@ -117,6 +55,22 @@ const Item = ({title, image, weight, price, newPrice, discount}) => (
   </View>
 );
 
+const ItemNews = ({title, image, weight, date, newPrice, discount}) => (
+  <View style={styles.itemNews}>   
+      <View>
+        <Image style={{width: '100%', height: 140}} source={{uri: image}} />
+        <Text
+          style={[
+            styles.title,
+            {fontSize: 12, fontWeight: '900', color: 'black', marginVertical: 10},
+          ]}>
+          {date}
+        </Text>
+        <Text style={[styles.title, {fontSize: 12}]}>{title}</Text>
+      </View>    
+  </View>
+);
+
 const Home = ({navigation}) => {
   const [isEnabled, setIsEnabled] = React.useState(false);
   const toggleSwitch = () => setIsEnabled(previousState => !previousState);
@@ -130,28 +84,20 @@ const Home = ({navigation}) => {
       discount={item.discount}
     />
   );
+
+  const renderItemNews = ({item}) => (
+    <ItemNews title={item.title} image={item.image} date={item.date} />
+  );
   return (
     <ScrollView style={styles.center}>
       <ImageSlider
         data={[
-          {
-            img: DATA[0].image,
-          },
-          {
-            img: DATA[1].image,
-          },
-          {
-            img: DATA[2].image,
-          },
-          {
-            img: DATA[3].image,
-          },
-          {
-            img: DATA[4].image,
-          },
-          {
-            img: DATA[5].image,
-          },
+          {img: store.dateHome[0].image},
+          {img: store.dateHome[1].image},
+          {img: store.dateHome[2].image},
+          {img: store.dateHome[3].image},
+          {img: store.dateHome[4].image},
+          {img: store.dateHome[5].image},
         ]}
         autoPlay={true}
         timer={2500}
@@ -178,12 +124,24 @@ const Home = ({navigation}) => {
       <View style={{paddingHorizontal: 16, marginTop: 20}}>
         <Text>{`Акции действует ${'с 31 августа по 13 сентября'}`}</Text>
       </View>
-      <FlatList
-        data={DATA}
-        renderItem={renderItem}
-        keyExtractor={item => item.id}
-        style={{marginTop: 30}}
-      />
+      {!isEnabled ? (
+        <FlatList
+          data={store.dateHome}
+          renderItem={renderItem}
+          keyExtractor={item => item.id}
+          style={{marginTop: 30}}
+        />
+      ) : (
+        <View style={{flexDirection: 'row'}}>
+          <FlatList
+            data={store.dateHomeNews}
+            renderItem={renderItemNews}
+            keyExtractor={item => item.id}
+            numColumns={2}
+            style={{marginTop: 30, marginHorizontal: 10,}}
+          />
+        </View>
+      )}
     </ScrollView>
   );
 };
@@ -203,6 +161,24 @@ const styles = StyleSheet.create({
     marginHorizontal: 16,
     borderRadius: 10,
     height: 200,
+    shadowColor: '#000',
+    shadowOffset: {
+      width: 0,
+      height: 7,
+    },
+  },
+  itemNews: {
+    flex: 1,
+    // backgroundColor: 'red',
+    // alignItems: 'center',
+    justifyContent: 'flex-start',
+    backgroundColor: '#fff',
+    padding: 16,
+    marginVertical: 6,
+    marginHorizontal: 5,
+    borderRadius: 10,
+    height: 300,
+    // width: 350,
     shadowColor: '#000',
     shadowOffset: {
       width: 0,
